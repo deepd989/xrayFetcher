@@ -1,0 +1,63 @@
+[INFO  2024-11-10T04:16:52,471 net.lightbody.bmp.proxy.Main] (main) Starting BrowserMob Proxy version 2.1.4 
+[INFO  2024-11-10T04:16:52,497 org.eclipse.jetty.util.log] (main) jetty-7.x.y-SNAPSHOT 
+[INFO  2024-11-10T04:16:52,559 org.eclipse.jetty.util.log] (main) started o.e.j.s.ServletContextHandler{/,null} 
+[WARN  2024-11-10T04:16:52,725 org.eclipse.jetty.util.log] (main) FAILED SelectChannelConnector@0.0.0.0:8080: java.net.BindException: Address already in use 
+[WARN  2024-11-10T04:16:52,737 org.eclipse.jetty.util.log] (main) FAILED org.eclipse.jetty.server.Server@3163987e: java.net.BindException: Address already in use 
+[ERROR 2024-11-10T04:16:52,738 net.lightbody.bmp.proxy.Main] (main) Failed to start Jetty server. Aborting. java.net.BindException: Address already in use
+	at sun.nio.ch.Net.bind0(Native Method) ~[?:1.8.0_431]
+	at sun.nio.ch.Net.bind(Net.java:438) ~[?:1.8.0_431]
+	at sun.nio.ch.Net.bind(Net.java:430) ~[?:1.8.0_431]
+	at sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:225) ~[?:1.8.0_431]
+	at sun.nio.ch.ServerSocketAdaptor.bind(ServerSocketAdaptor.java:74) ~[?:1.8.0_431]
+	at org.eclipse.jetty.server.nio.SelectChannelConnector.open(SelectChannelConnector.java:162) ~[browsermob-dist-2.1.4.jar:?]
+	at org.eclipse.jetty.server.AbstractConnector.doStart(AbstractConnector.java:356) ~[browsermob-dist-2.1.4.jar:?]
+	at org.eclipse.jetty.server.nio.SelectChannelConnector.doStart(SelectChannelConnector.java:240) ~[browsermob-dist-2.1.4.jar:?]
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:55) ~[browsermob-dist-2.1.4.jar:?]
+	at org.eclipse.jetty.server.Server.doStart(Server.java:269) ~[browsermob-dist-2.1.4.jar:?]
+	at org.eclipse.jetty[INFO  2024-11-10T14:24:04,142 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-18) Starting proxy at address: 0.0.0.0/0.0.0.0:8084 
+[INFO  2024-11-10T14:24:04,144 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-18) Proxy listening with TCP transport 
+[INFO  2024-11-10T14:24:04,145 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-18) Proxy started at address: /0:0:0:0:0:0:0:0:8084 
+[INFO  2024-11-10T14:25:52,381 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-19) Starting proxy at address: 0.0.0.0/0.0.0.0:8085 
+[INFO  2024-11-10T14:25:52,384 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-19) Proxy listening with TCP transport 
+[INFO  2024-11-10T14:25:52,385 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-19) Proxy started at address: /0:0:0:0:0:0:0:0:8085 
+[INFO  2024-11-10T14:29:46,596 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-18) Starting proxy at address: 0.0.0.0/0.0.0.0:8086 
+[INFO  2024-11-10T14:29:46,599 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-18) Proxy listening with TCP transport 
+[INFO  2024-11-10T14:29:46,600 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-18) Proxy started at address: /0:0:0:0:0:0:0:0:8086 
+[INFO  2024-11-10T14:30:12,423 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-19) Starting proxy at address: 0.0.0.0/0.0.0.0:8087 
+[INFO  2024-11-10T14:30:12,425 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-19) Proxy listening with TCP transport 
+[INFO  2024-11-10T14:30:12,427 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-19) Proxy started at address: /0:0:0:0:0:0:0:0:8087 
+[INFO  2024-11-10T14:33:20,087 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-16) Starting proxy at address: 0.0.0.0/0.0.0.0:8088 
+[INFO  2024-11-10T14:33:20,090 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-16) Proxy listening with TCP transport 
+[INFO  2024-11-10T14:33:20,091 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-16) Proxy started at address: /0:0:0:0:0:0:0:0:8088 
+[INFO  2024-11-10T14:34:43,353 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-17) Starting proxy at address: 0.0.0.0/0.0.0.0:8089 
+[INFO  2024-11-10T14:34:43,354 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-17) Proxy listening with TCP transport 
+[INFO  2024-11-10T14:34:43,356 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-17) Proxy started at address: /0:0:0:0:0:0:0:0:8089 
+[INFO  2024-11-10T14:36:10,027 org.littleshoot.proxy.impl.ClientToProxyConnection] (LittleProxy-8-ClientToProxyWorker-3) (AWAITING_INITIAL) [id: 0x7b5b9f2c, L:/0:0:0:0:0:0:0:1:8089 - R:/0:0:0:0:0:0:0:1:57884]: An IOException occurred on ClientToProxyConnection: Connection reset by peer 
+[INFO  2024-11-10T14:36:51,558 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-20) Starting proxy at address: 0.0.0.0/0.0.0.0:8090 
+[INFO  2024-11-10T14:36:51,559 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-20) Proxy listening with TCP transport 
+[INFO  2024-11-10T14:36:51,560 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-20) Proxy started at address: /0:0:0:0:0:0:0:0:8090 
+[INFO  2024-11-10T14:41:02,856 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-21) Starting proxy at address: 0.0.0.0/0.0.0.0:8091 
+[INFO  2024-11-10T14:41:02,859 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-21) Proxy listening with TCP transport 
+[INFO  2024-11-10T14:41:02,860 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-21) Proxy started at address: /0:0:0:0:0:0:0:0:8091 
+[INFO  2024-11-10T14:42:18,134 org.littleshoot.proxy.impl.ClientToProxyConnection] (LittleProxy-10-ClientToProxyWorker-0) (NEGOTIATING_CONNECT) [id: 0xe49339c3, L:/0:0:0:0:0:0:0:1:8091 - R:/0:0:0:0:0:0:0:1:54799]: An IOException occurred on ClientToProxyConnection: Connection reset by peer 
+[INFO  2024-11-10T14:42:18,138 org.littleshoot.proxy.impl.ProxyToServerConnection] (LittleProxy-10-ProxyToServerWorker-0) (DISCONNECTED) [id: 0xc4c83061, L:0.0.0.0/0.0.0.0:54800]: Connection to upstream server failed java.nio.channels.ClosedChannelException: null
+	at io.netty.handler.ssl.SslHandler.channelInactive(...)(Unknown Source) ~[browsermob-dist-2.1.4.jar:?]
+
+[INFO  2024-11-10T14:43:06,908 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-20) Starting proxy at address: 0.0.0.0/0.0.0.0:8092 
+[INFO  2024-11-10T14:43:06,909 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-20) Proxy listening with TCP transport 
+[INFO  2024-11-10T14:43:06,910 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-20) Proxy started at address: /0:0:0:0:0:0:0:0:8092 
+[INFO  2024-11-10T14:44:23,190 org.littleshoot.proxy.impl.ClientToProxyConnection] (LittleProxy-11-ClientToProxyWorker-5) (NEGOTIATING_CONNECT) [id: 0xaec14a13, L:/0:0:0:0:0:0:0:1:8092 - R:/0:0:0:0:0:0:0:1:55480]: An IOException occurred on ClientToProxyConnection: Connection reset by peer 
+[INFO  2024-11-10T14:44:23,192 org.littleshoot.proxy.impl.ProxyToServerConnection] (LittleProxy-11-ProxyToServerWorker-5) (HANDSHAKING) [id: 0xc4b7985a, L:0.0.0.0/0.0.0.0:55481 ! R:unpkg.com/104.17.247.203:443]: Connection to upstream server failed java.nio.channels.ClosedChannelException: null
+	at io.netty.handler.ssl.SslHandler.channelInactive(...)(Unknown Source) ~[browsermob-dist-2.1.4.jar:?]
+
+[INFO  2024-11-10T14:45:30,571 org.littleshoot.proxy.impl.ClientToProxyConnection] (LittleProxy-11-ClientToProxyWorker-3) (AWAITING_INITIAL) [id: 0xe794c775, L:/0:0:0:0:0:0:0:1:8092 - R:/0:0:0:0:0:0:0:1:56064]: An IOException occurred on ClientToProxyConnection: Connection reset by peer 
+[INFO  2024-11-10T14:47:48,574 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-20) Starting proxy at address: 0.0.0.0/0.0.0.0:8093 
+[INFO  2024-11-10T14:47:48,575 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-20) Proxy listening with TCP transport 
+[INFO  2024-11-10T14:47:48,576 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-20) Proxy started at address: /0:0:0:0:0:0:0:0:8093 
+[INFO  2024-11-10T14:48:40,154 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-17) Starting proxy at address: 0.0.0.0/0.0.0.0:8094 
+[INFO  2024-11-10T14:48:40,155 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-17) Proxy listening with TCP transport 
+[INFO  2024-11-10T14:48:40,156 org.littleshoot.proxy.impl.DefaultHttpProxyServer] (qtp891894789-17) Proxy started at address: /0:0:0:0:0:0:0:0:8094 
+[INFO  2024-11-10T14:50:10,062 org.littleshoot.proxy.impl.ClientToProxyConnection] (LittleProxy-13-ClientToProxyWorker-0) (NEGOTIATING_CONNECT) [id: 0x152ad812, L:/0:0:0:0:0:0:0:1:8094 - R:/0:0:0:0:0:0:0:1:57384]: An IOException occurred on ClientToProxyConnection: Connection reset by peer 
+[INFO  2024-11-10T14:50:10,064 org.littleshoot.proxy.impl.ProxyToServerConnection] (LittleProxy-13-ProxyToServerWorker-0) (HANDSHAKING) [id: 0x3f273c87, L:0.0.0.0/0.0.0.0:57385 ! R:update.googleapis.com/142.250.192.3:443]: Connection to upstream server failed java.nio.channels.ClosedChannelException: null
+	at io.netty.handler.ssl.SslHandler.channelInactive(...)(Unknown Source) ~[browsermob-dist-2.1.4.jar:?]
+
