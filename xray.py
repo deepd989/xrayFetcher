@@ -1,9 +1,12 @@
 import requests
 import re
+import os
+import pandas as pd
+import time
 
 cookies = {
     'key':"JSESSIONID",
-    'value':"node0fnpfw1ezgpsj1oksj4pdt86rl124.node0"
+    'value':"node01o25yz4bnyf91qr6xbifpizit146.node0"
     }
 
 def search(name,url):
@@ -23,7 +26,6 @@ def search(name,url):
         cookies['key']:cookies['value']
     }
     response = requests.post(url, json=payload,cookies=auth)
-    # print("POST request response:", response.json())
     response.raise_for_status()  # Raise an error for bad status codes
     
     responseData=response.json()['responseObject']
@@ -69,16 +71,14 @@ def getImageDto(patient_id):
 
         raise Exception(f"Failed to fetch data. Status code: {response.status_code}")
         
-def download_image(imgResponse,imageName):
+def download_image(imgResponse,imageName,folderDir):
     #replace .jpg with extension present in the path
     save_path=f'{imageName}.jpg'
     save_path=save_path.replace('/', '_')
-    print(save_path)
     try:
-        with open(save_path, 'wb') as file:
+        with open(folderDir+'/'+save_path, 'wb') as file:
             file.write(imgResponse.content)
-        print(f"Image downloaded successfully and saved to {save_path}")
-    except requests.exceptions.RequestException as e:
+    except Exception as e:
         print("An error occurred while downloading the image:", e)
 
 
@@ -94,7 +94,7 @@ def getImage(path):
         "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
         "Cache-Control": "no-cache",
         "Connection": "keep-alive",
-        'Cookie': 'IDS_AUTH_PERSISTENT=AAA:login:Virtualteam:PvWZKFEUi2Rp3',
+        'Cookie': 'IDS_AUTH_PERSISTENT=AAA:login:Virtualteam:FubfgpCv1uBXp',
         "Host": "smr.identalcloud.com",
         "Pragma": "no-cache",
         "Referer": "https://smr.identalcloud.com/MyDental/Dashboard",
@@ -110,8 +110,111 @@ def getImage(path):
     response.raise_for_status()  # Raise an error for bad status codes
     return response
 
+
+def convertToDto(imageApiData):
+    metadata={}
+    metadata['path']=imageApiData.get('imagePath')
+    metadata['name']=imageApiData.get('imageName')
+    metadata['id']=str(imageApiData.get('id'))
+    return metadata
+
+
+def getPaginatedImages(memberId,skipCount,settingDto):
+    url=f'https://smr.identalcloud.com/MyDental/service/imaging/getLazyLoadingImages/{memberId}/{skipCount}'
+    payload=settingDto
+    auth={
+        cookies['key']:cookies['value']
+    }
+    response = requests.post(url, json=payload,cookies=auth)
+    # print("POST request response:", response.json())
+    response.raise_for_status()  # Raise an error for bad status codes
+    
+    imageDataArr=response.json()['responseObject']
+    if(imageDataArr == None):
+        raise Exception(f'Invalid Paginated Response result Result {memberId}, {skipCount} ')
+    if(len(imageDataArr)==0):
+        return []
+    return imageDataArr
+
     
 
+
+def getSubsequentImages(memberId,skipCount,settingDto):
+    errorCount=0
+    finalResult=[]
+    while skipCount!=-1:
+        try:
+            data=getPaginatedImages(memberId,skipCount,settingDto)
+            if(len(data)==0):
+                skipCount=-1
+            else:
+                finalResult.extend(data)
+                skipCount+=len(data)
+            
+        except Exception as e:
+            if(errorCount>=5):
+                raise Exception("Error Encountered while fetching paginatedData",e)
+            else:
+                print("retrying for paginated data",errorCount)
+            errorCount+=1
+    return finalResult
+
+
+
+
+
+def getImageDataForMember(memberId):
+    #load initial data
+    responseObj=getImageDto(memberId)['responseObject']
+    settingsDto=responseObj['settingDto']
+    if(not responseObj):
+        raise Exception('Invalid DTO')
+    data=responseObj['userImageDtos']
+    imageMetadata=[]
+    for imageApiData in data:
+        imageMetadata.append(imageApiData)
+    imageMetadata.extend(getSubsequentImages(memberId,len(data),settingsDto))
+    return imageMetadata
+    
+
+
+
+def getImageData(memberIds):
+    patientData={}
+    for id in memberIds:
+        try:
+            data=getImageDataForMember(id)
+            imageMetadata=[]
+            for imageDto in data:
+                if(not isinstance(imageDto,dict)):
+                    continue
+                metadata=convertToDto(imageDto)
+                imageMetadata.append(metadata)
+            patientData[id]=imageMetadata
+        except Exception as e:
+            print(f"Couldnt prepare patient metadata {id}",e)
+    return patientData
+
+
+def read_excel_column(file_path, sheet_name, column_name):
+    try:
+        # Load the specific sheet from the Excel file
+        df = pd.read_excel(file_path, sheet_name=sheet_name)
+        
+        # Check if the column exists in the sheet
+        if column_name in df.columns:
+            # Return the specific column
+            return df[column_name]
+        else:
+            print(f"Column '{column_name}' not found in sheet '{sheet_name}'.")
+            return None
+    except FileNotFoundError:
+        print(f"The file '{file_path}' was not found.")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
     
 
 
@@ -125,8 +228,7 @@ def getImage(path):
 
 
 
-def main():
-    name='Joanna'+" "+'Abou-baker'
+def getPatientXray(name):
     url1='https://smr.identalcloud.com/MyDental/service/patients/search2'
     url2='https://smr.identalcloud.com/MyDental/service/patients/search2TotalRecords'
     data1=[]
@@ -139,7 +241,7 @@ def main():
     try:
         data2=search(name,url2)
     except Exception as e:
-        print("An error occurred in 2", e)
+        print("Search 2 failed", e)
 
     if(len(data1)==0 and len(data2)==0):
         #handle patient not found error
@@ -148,42 +250,50 @@ def main():
     
     memberIds=list(set(data1+data2))
     print("memberIDs ",memberIds)
-    patientData={}
-    for id in memberIds:
-        try:
-            responseObj=getImageDto(id)['responseObject']
-            if(not responseObj):
-                raise Exception('Invalid DTO')
-            data=responseObj['userImageDtos']
-            imageMetadata=[]
-            for imageDto in data:
-                metadata={}
-                metadata['path']=imageDto['imagePath']
-                metadata['name']=imageDto['imageName']
-                metadata['id']=str(imageDto['id'])
-                imageMetadata.append(metadata)
-            patientData[id]=imageMetadata
-        except Exception as e:
-            print("Couldnt prepare patient metadata",id)
 
+    patientData=getImageData(memberIds)
             
-    # print(patientData)        
+    print(f"Got image DTOs for {memberIds} initiating download")
+    patientIdx=0   
     for id in patientData:
         try:
-            print(id)
+            directory='downloads/'+str(id)+"_"+name.replace(" ","_")+"_"+str(patientIdx)
+            if not os.path.exists(directory):
+                os.mkdir(directory)
             patientImageMetaData=patientData[id]
+            idx=0
             for metadata in patientImageMetaData:
                 path=metadata['path']
-                print(path)
                 imgResponse=getImage(path)
-                download_image(imgResponse,f"{metadata['name']}-{id}")
-
+                download_image(imgResponse,f"{metadata['name']}-{id}-{str(idx)}",directory)
+                time.sleep(0.25)
+                print(f"Downloaded {idx} file from {len(patientImageMetaData)} for patient {id}")
+                idx+=1
+            print(f"Download Complete, downloaded {idx} files of {len(patientImageMetaData)}")
+            patientIdx+=1
+            
+            
         except Exception as e:
             #log error
             print(f"COULDNT FETCH IMAGE DTO for {id}",e)
 
 
-main()
+name="Marianne Collins"
+
+col=read_excel_column("input_sheet.xlsx",'Watertown','Patient')
+patientNames=[]
+for entry in col:
+    data=entry.split(',')
+    data=[s.strip() for s in data]
+    patientNames.append(data[1]+" "+data[0])
+for name in patientNames:
+    getPatientXray(name)
+    time.sleep(2)
+
+
+
+
+# getPatientXray("Rubila Argueta")
     
 
 
