@@ -1,3 +1,4 @@
+import json
 import requests
 import re
 import os
@@ -6,8 +7,10 @@ import time
 
 cookies = {
     'key':"JSESSIONID",
-    'value':"node01o25yz4bnyf91qr6xbifpizit146.node0"
+    'value':"node01x4ki34dmugl31bqqn17vk7khp496.node0"
     }
+
+errors={}
 
 def search(name,url):
     payload = {
@@ -30,7 +33,7 @@ def search(name,url):
     
     responseData=response.json()['responseObject']
     if(not responseData):
-        raise Exception('Invalid Search Result '+name)
+        return []
     patients=responseData['lstObject']
     if(len(patients)==0):
         return []
@@ -69,9 +72,9 @@ def getImageDto(patient_id):
         return response.json()  # Return the response as a Python dictionary (parsed JSON)
     else:
 
-        raise Exception(f"Failed to fetch data. Status code: {response.status_code}")
+        raise Exception(f"Failed to fetch image dto. Status code: {response.status_code}")
         
-def download_image(imgResponse,imageName,folderDir):
+def download_image(imgResponse,imageName,folderDir,name):
     #replace .jpg with extension present in the path
     save_path=f'{imageName}.jpg'
     save_path=save_path.replace('/', '_')
@@ -79,13 +82,17 @@ def download_image(imgResponse,imageName,folderDir):
         with open(folderDir+'/'+save_path, 'wb') as file:
             file.write(imgResponse.content)
     except Exception as e:
+        message=f"An error occurred while downloading the image {str(e)}"
+        storeError(name,message)
         print("An error occurred while downloading the image:", e)
 
 
-def getImage(path):
+def getImage(path,name):
     match=re.search(r'Customer/(.*)', path)
     if not match:
-        raise Exception("COULDNT PARSE PATH",path)
+        message=f"COULDNT PARSE IMAGE PATH {path}"
+        storeError(name,message)
+        raise Exception("COULDNT PARSE IMAGE PATH",path)
     url='https://smr.identalcloud.com/MyDental_persistent/Customer/'+match.group(1)
     global cookies
     headers = {
@@ -94,7 +101,7 @@ def getImage(path):
         "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
         "Cache-Control": "no-cache",
         "Connection": "keep-alive",
-        'Cookie': 'IDS_AUTH_PERSISTENT=AAA:login:Virtualteam:FubfgpCv1uBXp',
+        'Cookie': 'IDS_AUTH_PERSISTENT=AAA:login:Virtualteam:UcCH17VIItiqr',
         "Host": "smr.identalcloud.com",
         "Pragma": "no-cache",
         "Referer": "https://smr.identalcloud.com/MyDental/Dashboard",
@@ -131,7 +138,7 @@ def getPaginatedImages(memberId,skipCount,settingDto):
     
     imageDataArr=response.json()['responseObject']
     if(imageDataArr == None):
-        raise Exception(f'Invalid Paginated Response result Result {memberId}, {skipCount} ')
+        raise Exception(f'Invalid Paginated Response Result {memberId}, {skipCount} ')
     if(len(imageDataArr)==0):
         return []
     return imageDataArr
@@ -139,7 +146,7 @@ def getPaginatedImages(memberId,skipCount,settingDto):
     
 
 
-def getSubsequentImages(memberId,skipCount,settingDto):
+def getSubsequentImages(memberId,skipCount,settingDto,name):
     errorCount=0
     finalResult=[]
     while skipCount!=-1:
@@ -153,7 +160,9 @@ def getSubsequentImages(memberId,skipCount,settingDto):
             
         except Exception as e:
             if(errorCount>=5):
-                raise Exception("Error Encountered while fetching paginatedData",e)
+                message=f"Error Encountered while fetching paginatedData {str(e)}"
+                storeError(name,message)
+                raise Exception(message)
             else:
                 print("retrying for paginated data",errorCount)
             errorCount+=1
@@ -163,27 +172,28 @@ def getSubsequentImages(memberId,skipCount,settingDto):
 
 
 
-def getImageDataForMember(memberId):
+def getImageDataForMember(memberId,name):
     #load initial data
     responseObj=getImageDto(memberId)['responseObject']
     settingsDto=responseObj['settingDto']
     if(not responseObj):
-        raise Exception('Invalid DTO')
+        storeError(name,'Invalid Image DTO')
+        raise Exception('Invalid Image DTO')
     data=responseObj['userImageDtos']
     imageMetadata=[]
     for imageApiData in data:
         imageMetadata.append(imageApiData)
-    imageMetadata.extend(getSubsequentImages(memberId,len(data),settingsDto))
+    imageMetadata.extend(getSubsequentImages(memberId,len(data),settingsDto,name))
     return imageMetadata
     
 
 
 
-def getImageData(memberIds):
+def getImageData(memberIds,name):
     patientData={}
     for id in memberIds:
         try:
-            data=getImageDataForMember(id)
+            data=getImageDataForMember(id,name)
             imageMetadata=[]
             for imageDto in data:
                 if(not isinstance(imageDto,dict)):
@@ -192,7 +202,9 @@ def getImageData(memberIds):
                 imageMetadata.append(metadata)
             patientData[id]=imageMetadata
         except Exception as e:
-            print(f"Couldnt prepare patient metadata {id}",e)
+            message=f"Couldnt prepare patient image dto {id}, {str(e)}",
+            print(message)
+            storeError(name,message)
     return patientData
 
 
@@ -208,12 +220,17 @@ def read_excel_column(file_path, sheet_name, column_name):
         else:
             print(f"Column '{column_name}' not found in sheet '{sheet_name}'.")
             return None
-    except FileNotFoundError:
-        print(f"The file '{file_path}' was not found.")
-        return None
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"Couldnt find excel colum {e}")
         return None
+
+
+def storeError(name,message):
+    global errors
+    if(name in errors):
+        errors[name].append(message)
+    else:
+        errors[name]=[message]
 
     
 
@@ -245,28 +262,28 @@ def getPatientXray(name):
 
     if(len(data1)==0 and len(data2)==0):
         #handle patient not found error
-        print("PATIENT NOT FOUND",name)
+        global errors
+        errors[name]=['Patient Not Found Via Search1 and Search2']
         return 
     
     memberIds=list(set(data1+data2))
     print("memberIDs ",memberIds)
 
-    patientData=getImageData(memberIds)
+    patientData=getImageData(memberIds,name)
             
     print(f"Got image DTOs for {memberIds} initiating download")
     patientIdx=0   
     for id in patientData:
         try:
-            directory='downloads/'+str(id)+"_"+name.replace(" ","_")+"_"+str(patientIdx)
-            if not os.path.exists(directory):
-                os.mkdir(directory)
+            directory=f'downloads/{clinicName}/{str(rowNumber)}/'+str(id)+"_"+name.replace(" ","_")+"_"+str(patientIdx)
+            os.makedirs(directory, exist_ok=True)
             patientImageMetaData=patientData[id]
             idx=0
             for metadata in patientImageMetaData:
                 path=metadata['path']
-                imgResponse=getImage(path)
-                download_image(imgResponse,f"{metadata['name']}-{id}-{str(idx)}",directory)
-                time.sleep(0.25)
+                imgResponse=getImage(path,name)
+                download_image(imgResponse,f"{metadata['name']}-{id}-{str(idx)}",directory,name)
+                # time.sleep(0.25)
                 print(f"Downloaded {idx} file from {len(patientImageMetaData)} for patient {id}")
                 idx+=1
             print(f"Download Complete, downloaded {idx} files of {len(patientImageMetaData)}")
@@ -275,20 +292,49 @@ def getPatientXray(name):
             
         except Exception as e:
             #log error
+            message=f"COULDNT FETCH IMAGE DTO for {id},{str(e)}"
+            storeError(name,message)
             print(f"COULDNT FETCH IMAGE DTO for {id}",e)
 
 
-name="Marianne Collins"
-
-col=read_excel_column("input_sheet.xlsx",'Watertown','Patient')
+clinicName='Revere'
+rowNumber=250
+col=read_excel_column("input_sheet.xlsx",clinicName,'Patient')
 patientNames=[]
 for entry in col:
     data=entry.split(',')
     data=[s.strip() for s in data]
     patientNames.append(data[1]+" "+data[0])
-for name in patientNames:
-    getPatientXray(name)
-    time.sleep(2)
+
+maxPages=5
+nameDict={}
+while True:
+    end=min(rowNumber+51,len(patientNames))
+    print("fetching patient",rowNumber,end)
+    idx=0
+    for name in patientNames[rowNumber:end]:
+        if(name in nameDict):
+            idx+=1
+        else:
+            print("fetching",name,idx)
+            getPatientXray(name) 
+            idx+=1
+            nameDict[name]=True
+    # Construct the directory path
+    directory_path = f"downloads/{clinicName}/{str(rowNumber)}"
+    os.makedirs(directory_path, exist_ok=True)
+    # Write JSON data to the file
+    with open(f"{directory_path}/errors.json", "w") as file:
+        json.dump(errors, file, indent=5)
+    if(len(patientNames)<=end):
+        break
+    if(maxPages*50<=rowNumber):
+        break
+    rowNumber+=50
+    
+
+
+
 
 
 
